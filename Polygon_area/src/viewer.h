@@ -15,9 +15,8 @@ struct polygon_area_viewer : viewer_adapter
 			: putting_vertices(true)
 			, checking_pt(true)
 			, counting_marea(false)
-			, pointsnum(1000000)
 			, answer(false)
-			//,putting_pnum(false)
+			//,start_counting(true)
 		{}
 
     void draw(drawer_type & drawer)     const;
@@ -31,14 +30,12 @@ private:
 	point_type point_to_check;
 	std::vector<point_type> rect_vert;
 	bool putting_vertices;
-	//bool putting_pnum;
 	bool checking_pt;
 	bool counting_marea;
 	bool answer;
 	double area;
 	double marea;
 	int32 pointsnum;
-    
 };
 
 void polygon_area_viewer::draw(drawer_type & drawer) const
@@ -62,19 +59,20 @@ void polygon_area_viewer::draw(drawer_type & drawer) const
 	}
 	drawer.set_color(Qt::red);
 	
-	if(!counting_marea){
-		for(int i=0; i< rect_vert.size();i++){
-			point_type const & pt1 = rect_vert[i];
-			point_type const & pt2 = rect_vert[(i+1)%rect_vert.size()];
-			drawer.draw_line(pt1, pt2, 3);
-		}
+	
+	for(int i=0; i< rect_vert.size();i++){
+		point_type const & pt1 = rect_vert[i];
+		point_type const & pt2 = rect_vert[(i+1)%rect_vert.size()];
+		drawer.draw_line(pt1, pt2, 3);
 	}
 }
 
 void polygon_area_viewer::print(printer_type & printer) const
 {
 	printer.corner_stream() << "Put vertices of polygon in counterclockwise order, then press \"d\"." << endl;
-    printer.corner_stream() << "Double-click to put the point to check. Press \"Enter\"." << endl;
+    if(!putting_vertices){
+		printer.corner_stream() << "Double-click to put the point to check. Press \"Enter\"." << endl;
+	}
     if (!checking_pt){
 		if(answer){
        		printer.corner_stream() <<"The point is inside the polygon" << endl;
@@ -82,17 +80,11 @@ void polygon_area_viewer::print(printer_type & printer) const
 			printer.corner_stream() <<"The point is outside the polygon"<< endl;
 		}
 		printer.corner_stream() <<"Area of the polygon = " << area << endl;
-		if(!counting_marea){
-			printer.corner_stream() <<"mArea of the polygon = " << marea << endl;
+		printer.corner_stream() <<"For checking area with Monte-Karlo method press \"m\"." << endl;
+		if(!counting_marea && pointsnum>0){
+			printer.corner_stream() <<"Monte-Karlo area of the polygon = " << marea << endl;
 		}
 	}
-	
-	//printer.corner_stream() <<"For checking area with Monte-Karlo method press \"m\"." << endl
-	//if(putting_pnum){
-		//printer.corner_stream() <<"Put the number of random points, then press \"a\"." << endl;
-	//}
-	//if(!counting_mk)
-		//printer.corner_stream() <<"Monte-Karlo area of the polygon = " << marea << endl;
 }
 
 bool polygon_area_viewer::on_double_click(point_type const & pt)
@@ -106,6 +98,17 @@ bool polygon_area_viewer::on_double_click(point_type const & pt)
     return true;
 }
 
+int32 enter_num(int32 &pointsnum){
+	bool ok;
+	int32 pn = QInputDialog::getInteger( 0,"Monte-Carlo",
+                                     "Enter the number of points for Monte-Carlo method:", 
+                                     pointsnum, 0, 2147483647, 1000, &ok);
+	if(!ok){
+		pn=-1;
+	}
+	return pn;
+}
+
 bool polygon_area_viewer::on_key(int key)
 {
     switch (key)
@@ -116,24 +119,22 @@ bool polygon_area_viewer::on_key(int key)
             answer = geom::algorithms::polygon_area::check_point(poly_vert, rect_vert, point_to_check);
 			area = abs(geom::algorithms::polygon_area::area(poly_vert));
 			checking_pt = false;
-			marea = geom::algorithms::polygon_area::Monte_Karlo_area(poly_vert, rect_vert, pointsnum);
-			counting_marea = false;
+			counting_marea = true;
             return true;
         }
         break;
-	/*case Qt::Key_m:
+	case Qt::Key_M:
 		{ 
-			counting_mk = true;
-			putting_pnum = true;
-        }
-        break;
-	case Qt::Key_a:
-		{ 
-			marea = geom::algorithms::polygon_area::Monte_Karlo_area(&poly_vert, &rect_vert, pointsnum);
-			counting_mk = false;
+			//counting_marea = true;
+			pointsnum= enter_num(pointsnum);
+		if(pointsnum>0){
+			marea = geom::algorithms::polygon_area::Monte_Karlo_area(poly_vert, rect_vert, pointsnum);
+		}
+			counting_marea = false;
+			
         	return true;
         }
-        break;*/
+        break;
 	case Qt::Key_D:
         {
 			putting_vertices = false;

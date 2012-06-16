@@ -9,3 +9,4 @@
 #include <QApplication>
 #include <QWidget>
 #include <QFileDialog>
+#include <QInputDialog>
