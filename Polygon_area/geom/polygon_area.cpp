@@ -136,36 +136,14 @@ double Monte_Karlo_area(vector<point_type> &poly_vert, vector<point_type>& rect_
 		point_type pt;
 		pt.x = roll(rect_vert[0].x, rect_vert[2].x);
 		pt.y = roll(rect_vert[0].y, rect_vert[2].y);
-		//std::cout<<pt.x<<","<<pt.y<<";";
 		if(check_point(poly_vert, rect_vert, pt)) 
 		{
 			inside_points++;
 		}
 	}
-	//cout<<inside_points<<"\n";
 	double mkarea;
 	return mkarea = area(rect_vert)*inside_points/pnum; 
 }
 
 }}}
-/*int main(){
 
-	double polygon_area;
-	double polygon_mkarea;
-
-	//freopen("polygon_area.in", "r", stdin);
-	//freopen("polygon_area.out", "w", stdout);
-
-	vector<point_type> vertices;
-	for(int i = 0; i < P.N; i++){
-		point_type v;
-		std::cin >> v.x >> v.y;
-		vertices.push_back(v);
-	}
-
-	polygon_area = abs(area(P));
-	polygon_mkarea = abs(Monte_Karlo_area(P));
-	std::cout << "Polygon area = " << polygon_area << "\n";
-	std::cout << "Polygon Monte-Karlo area = " << polygon_mkarea;
-	return 0;
-}*/
