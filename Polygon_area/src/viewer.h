@@ -52,21 +52,22 @@ void polygon_area_viewer::draw(drawer_type & drawer) const
 		point_type const & pt2 = poly_vert[(i+1)%poly_vert.size()];
 		drawer.draw_line(pt1, pt2, 2);
 	}
-	drawer.set_color(Qt::green);
+	//drawer.set_color(Qt::green);
 	if(!putting_vertices){
+		if(answer) {drawer.set_color(Qt::green);} else{drawer.set_color(Qt::red);}
 		drawer.draw_point(point_to_check, 3);
 		point_type beam;
 		beam.x=rect_vert[0].x;
 		beam.y=point_to_check.y;
 		drawer.draw_line(point_to_check, beam, 1);
 	}
-	drawer.set_color(Qt::red);
+	drawer.set_color(Qt::white);
 	
 	
 	for(int i=0; i< rect_vert.size();i++){
 		point_type const & pt1 = rect_vert[i];
 		point_type const & pt2 = rect_vert[(i+1)%rect_vert.size()];
-		drawer.draw_line(pt1, pt2, 3);
+		drawer.draw_line(pt1, pt2, 2);
 	}
 }
 
