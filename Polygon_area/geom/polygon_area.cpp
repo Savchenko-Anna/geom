@@ -94,7 +94,7 @@ bool check_point(vector<point_type> &poly_vert, vector<point_type>& rect_vert, p
 		} 
 		else
 		{//doesn't belong to boundary
-			if((pt.y == poly_vert[j].y)&&(pt.x < poly_vert[j].x))
+			if((pt.y == poly_vert[j].y)&&(pt.x > poly_vert[j].x))
 			{  //beam crosses the vertex
 				if((poly_vert[k].y-pt.y)*(poly_vert[m].y-pt.y)<0)
 				{

@@ -16,6 +16,7 @@ struct polygon_area_viewer : viewer_adapter
 			, checking_pt(true)
 			, counting_marea(false)
 			, answer(false)
+			, pointsnum(0)
 			//,start_counting(true)
 		{}
 
@@ -24,6 +25,8 @@ struct polygon_area_viewer : viewer_adapter
 
     bool on_double_click(point_type const & pt);
     bool on_key(int key);
+    bool on_move(point_type const & pt);
+    //int32 enter_num(int32 &pointsnum);
 
 private:
     std::vector<point_type> poly_vert; 
@@ -69,11 +72,11 @@ void polygon_area_viewer::draw(drawer_type & drawer) const
 
 void polygon_area_viewer::print(printer_type & printer) const
 {
-	printer.corner_stream() << "Put vertices of polygon in counterclockwise order, then press \"d\"." << endl;
-    if(!putting_vertices){
-		printer.corner_stream() << "Double-click to put the point to check. Press \"Enter\"." << endl;
+	//printer.corner_stream() << "Put vertices of polygon in counterclockwise order, then press \"Enter\"." << endl;
+    if(putting_vertices){
+		printer.corner_stream() << "Put vertices of polygon in counterclockwise order, then press \"Enter\"." << endl;
 	}
-    if (!checking_pt){
+    if (!putting_vertices){
 		if(answer){
        		printer.corner_stream() <<"The point is inside the polygon" << endl;
 		} else{
@@ -81,6 +84,9 @@ void polygon_area_viewer::print(printer_type & printer) const
 		}
 		printer.corner_stream() <<"Area of the polygon = " << area << endl;
 		printer.corner_stream() <<"For checking area with Monte-Karlo method press \"m\"." << endl;
+		if(counting_marea){
+       			//printer.corner_stream() <<"Counting..." << endl;
+		}
 		if(!counting_marea && pointsnum>0){
 			printer.corner_stream() <<"Monte-Karlo area of the polygon = " << marea << endl;
 		}
@@ -100,32 +106,52 @@ bool polygon_area_viewer::on_double_click(point_type const & pt)
 
 int32 enter_num(int32 &pointsnum){
 	bool ok;
-	int32 pn = QInputDialog::getInteger( 0,"Monte-Carlo",
+	
+	int32 pn = QInputDialog::getInteger(0, "Monte-Carlo",
                                      "Enter the number of points for Monte-Carlo method:", 
                                      pointsnum, 0, 2147483647, 1000, &ok);
 	if(!ok){
 		pn=-1;
-	}
+	} 
 	return pn;
 }
 
+bool polygon_area_viewer::on_move(point_type const & pt)
+{
+    if (poly_vert.size() > 2 && !putting_vertices)
+            {
+		point_to_check = pt;
+                answer = geom::algorithms::polygon_area::check_point(poly_vert, rect_vert, point_to_check);
+			area = abs(geom::algorithms::polygon_area::area(poly_vert));
+		
+            }
+
+    return true;
+}
 bool polygon_area_viewer::on_key(int key)
 {
     switch (key)
     {
     case Qt::Key_Return: 
-        if (poly_vert.size() > 2)
+       /* if (poly_vert.size() > 2)
         {
             answer = geom::algorithms::polygon_area::check_point(poly_vert, rect_vert, point_to_check);
 			area = abs(geom::algorithms::polygon_area::area(poly_vert));
 			checking_pt = false;
 			counting_marea = true;
             return true;
-        }
+        }*/
+	{
+		putting_vertices = false;
+			rect_vert = geom::algorithms::polygon_area::rectangle(poly_vert);
+	}
         break;
 	case Qt::Key_M:
 		{ 
-			//counting_marea = true;
+			putting_vertices = false;
+			rect_vert = geom::algorithms::polygon_area::rectangle(poly_vert);
+
+			counting_marea = true;
 			pointsnum= enter_num(pointsnum);
 		if(pointsnum>0){
 			marea = geom::algorithms::polygon_area::Monte_Karlo_area(poly_vert, rect_vert, pointsnum);
@@ -135,12 +161,12 @@ bool polygon_area_viewer::on_key(int key)
         	return true;
         }
         break;
-	case Qt::Key_D:
+	/*case Qt::Key_D:
         {
 			putting_vertices = false;
 			rect_vert = geom::algorithms::polygon_area::rectangle(poly_vert);
 		}
-		break;
+		break;*/
     case Qt::Key_S:
         {
             std::string filename = QFileDialog::getSaveFileName(
