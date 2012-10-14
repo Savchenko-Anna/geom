@@ -68,6 +68,7 @@ bool intersect(point_type a, point_type b, point_type c, point_type d)
 bool check_point(vector<point_type> &poly_vert, vector<point_type>& rect_vert, point_type pt)
 {
 	int intersectnum;
+
 	point_type point_for_beam;
 	point_for_beam.x = rect_vert[0].x;
 	point_for_beam.y = pt.y;
@@ -94,21 +95,23 @@ bool check_point(vector<point_type> &poly_vert, vector<point_type>& rect_vert, p
 		} 
 		else
 		{//doesn't belong to boundary
-			if((pt.y == poly_vert[j].y)&&(pt.x > poly_vert[j].x))
-			{  //beam crosses the vertex
-				if((poly_vert[k].y-pt.y)*(poly_vert[m].y-pt.y)<0)
-				{
-						intersectnum++;
-				}
-			} 
-			else if((poly_vert[j].y == poly_vert[m].y)&&(pt.y == poly_vert[j].y))
+			if((poly_vert[j].y == poly_vert[m].y)&&(pt.y == poly_vert[j].y))
 			{  //beam matches poly's side
-				if((poly_vert[k].y-pt.y)*(poly_vert[h].y-pt.y)<0)
+			
+				if(((poly_vert[k].y-pt.y)*(poly_vert[h].y-pt.y))<0)
 				{
 						intersectnum++;
 				}
 			} 
-			else if(intersect(pt, point_for_beam, poly_vert[j], poly_vert[m])) 
+			/*if((pt.y == poly_vert[j].y)&&(pt.x > poly_vert[j].x))
+			{  //beam crosses the vertex
+				if((poly_vert[k].y-pt.y)*(poly_vert[m].y-pt.y)>0)
+				{
+						intersectnum++;
+				}
+			} */
+			
+			if(intersect(pt, point_for_beam, poly_vert[j], poly_vert[m])) 
 			{  //beam crosses poly's side
 					intersectnum++;
 			}
